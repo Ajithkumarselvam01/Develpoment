@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Image to AVIF Converter</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Coiny&family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Noto+Sans+Tamil:wght@100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Teko:wght@300..700&display=swap" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+	<!-- Latest Font Awesome CDN -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+	<style>
+	body {
+		background-color: #E8FCFC;
+	}
+
+	.container-1 {
+		background: none;
+		padding: 20px;
+		border-radius: 10px;
+		margin: auto;
+	}
+
+	.image-list {
+		list-style: none;
+		padding: 0;
+		max-height: 400px;
+		overflow-y: auto;
+	}
+
+	.image-list li {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 10px;
+		border: 1px solid #ddd;
+		background: #fff;
+		font-family: 'Poppins';
+		font-size: 16px;
+		color: #056B68;
+	}
+
+	.convert-btn {
+		padding: 10px 15px;
+		border: none;
+		background-color: #056B68;
+		color: white;
+		border-radius: 5px;
+		cursor: pointer;
+	}
+
+	.remove-btn {
+		background-color: #056B68;
+		border: none;
+		color: white;
+		padding: 5px;
+		cursor: pointer;
+		border-radius: 5px;
+		width: 30px;
+		height: 30px;
+	}
+
+	.drop-area {
+		border: 2px dashed #00B1AF;
+		padding: 40px;
+		margin: 20px auto;
+		text-align: center;
+		cursor: pointer;
+		color: #056B68;
+		font-weight: 500;
+		border-radius: 5px;
+		height: 400px;
+		font-family: 'poppins';
+		background: #fff;
+	}
+
+	.conent-section h1 {
+		font-size: 50px;
+		text-align: center;
+		margin-bottom: 20px;
+		font-family: 'Poppins';
+		font-weight: 600;
+		color: #056B68;
+	}
+
+	.conent-section p {
+		font-size: 20px;
+		text-align: center;
+		font-family: 'Poppins';
+		font-weight: 400;
+		margin-bottom: 20px;
+	}
+
+	section.conent-section {
+		padding: 50px 30px;
+	}
+
+	section.image-converter {
+		padding: 30px 50px;
+	}
+
+	.image-list span {
+		width: 500px;
+	}
+
+	@media screen and (max-width: 900px) {
+		section.content-section {
+			/* Corrected class name */
+			padding: 20px 10px;
+		}
+
+		.image-list span {
+			width: auto;
+		}
+
+		section.image-converter {
+			padding: 20px 10px;
+		}
+
+		.conent-section h1 {
+			/* Corrected class name */
+			font-size: 35px;
+		}
+
+		.conent-section p {
+			/* Corrected class name */
+			font-size: 16px;
+		}
+
+		.container-1 {
+			padding: 0;
+		}
+
+		.image-list li {
+			display: grid;
+			gap: 10px;
+		}
+	}
+	</style>
+</head>
+
+<body>
+	<section class="conent-section">
+		<div class="container">
+			<h1>PNG to AVIF Converter</h1>
+			<p>Convert PNG to AVIF online for free. Simply drop your PNG images below to convert them to AVIF in seconds.</p>
+		</div>
+	</section>
+	<section class="image-converter">
+		<div class="container container-1">
+			<div class="drop-area" id="drop-area">Drop Your Files Here</div>
+			<input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg" multiple hidden>
+			<ul class="image-list" id="imageList"></ul>
+		</div>
+	</section>
+	<script>
+	const dropArea = document.getElementById("drop-area");
+	const fileInput = document.getElementById("fileInput");
+	const imageList = document.getElementById("imageList");
+	let files = [];
+	dropArea.addEventListener("click", () => fileInput.click());
+	fileInput.addEventListener("change", handleFiles);
+	dropArea.addEventListener("dragover", (e) => {
+		e.preventDefault();
+		dropArea.style.borderColor = "blue";
+	});
+	dropArea.addEventListener("dragleave", () => dropArea.style.borderColor = "#a5a5a5");
+	dropArea.addEventListener("drop", (e) => {
+		e.preventDefault();
+		dropArea.style.borderColor = "#a5a5a5";
+		handleFiles(e.dataTransfer);
+	});
+
+	function handleFiles(event) {
+		let newFiles = event.files || fileInput.files;
+		if(files.length + newFiles.length > 10) {
+			alert("You can only upload up to 10 images.");
+			return;
+		}
+		for(let file of newFiles) {
+			files.push(file);
+			displayFile(file);
+		}
+	}
+
+	function displayFile(file) {
+		const li = document.createElement("li");
+		li.innerHTML = `
+            <span>${file.name} (${Math.round(file.size / 1024)} KB)</span>
+            <button class="convert-btn" onclick="convertToAvif('${file.name}')">Convert to AVIF</button>
+            <button class="remove-btn" onclick="removeFile('${file.name}')">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        `;
+		imageList.appendChild(li);
+	}
+
+	function removeFile(fileName) {
+		files = files.filter(file => file.name !== fileName);
+		renderFileList();
+	}
+
+	function renderFileList() {
+		imageList.innerHTML = "";
+		files.forEach(displayFile);
+	}
+
+	function convertToAvif(fileName) {
+		const file = files.find(f => f.name === fileName);
+		if(!file) return;
+		const reader = new FileReader();
+		reader.readAsDataURL(file);
+		reader.onload = function(event) {
+			const img = new Image();
+			img.src = event.target.result;
+			img.onload = function() {
+				const canvas = document.createElement("canvas");
+				const maxWidth = 800;
+				const maxHeight = 600;
+				let width = img.width;
+				let height = img.height;
+				// Resize maintaining aspect ratio
+				if(width > maxWidth || height > maxHeight) {
+					const aspectRatio = width / height;
+					if(width > height) {
+						width = maxWidth;
+						height = Math.round(width / aspectRatio);
+					} else {
+						height = maxHeight;
+						width = Math.round(height * aspectRatio);
+					}
+				}
+				canvas.width = width;
+				canvas.height = height;
+				const ctx = canvas.getContext("2d");
+				ctx.drawImage(img, 0, 0, width, height);
+				canvas.toBlob((blob) => {
+					if(!blob) {
+						alert("Conversion failed. Your browser may not support AVIF.");
+						return;
+					}
+					const avifFile = new File([blob], file.name.replace(/\.\w+$/, ".avif"), {
+						type: "image/avif"
+					});
+					downloadFile(avifFile);
+				}, "image/avif", 0.5); // Compression quality (0.5 = 50%)
+			};
+		};
+	}
+
+	function downloadFile(file) {
+		const link = document.createElement("a");
+		link.href = URL.createObjectURL(file);
+		link.download = file.name;
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+	}
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+</body>
+
+</html>
